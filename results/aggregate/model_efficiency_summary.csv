@@ -1,0 +1,7 @@
+model,encoder_parameters,paper_route_tensor_batch1,sampling_rate_hz,output_dim_per_window,batch1_median_ms,batch1_iqr_ms,batch1_p95_ms,batch15_60s_median_ms,batch15_60s_iqr_ms,batch15_60s_p95_ms,batch15_windows_per_second,approx_peak_rss_delta_mib
+Sleep2MI,68322,1x64x400,100.0,32,3.890,0.058,4.136,40.459,2.123,44.499,370.75,95.00
+EEGNetv4--Lee2019_MI,1152,1x3x512,128.0,256,0.613,0.116,0.688,3.467,1.043,4.400,4326.76,14.85
+ShallowFBCSPNet--Lee2019,77920,1x48x512,128.0,1120,1.644,0.082,1.847,26.610,0.957,27.931,563.69,15.09
+BIOT,3186688,1x16x800,200.0,256,9.159,0.164,9.563,107.875,0.978,112.998,139.05,43.96
+REVE Base,69189632,1x64x800,200.0,512,352.529,48.157,403.839,6090.135,773.727,6971.002,2.46,528.19
+
