@@ -14,7 +14,7 @@ representations to motor-imagery BCI phenotypes.
 - the study-specific participant geometry statistic and resampling utilities;
 - a synthetic smoke test that exercises the model, objectives, and geometry
   without using participant data;
-- aggregate computational-efficiency results reported in the manuscript.
+- the aggregate CPU-efficiency summary reported in the manuscript.
 
 Public EEG recordings, participant-level derived data, model checkpoints, and
 third-party model weights are not redistributed. Dataset acquisition and cohort
@@ -28,7 +28,7 @@ Python 3.11 or later is recommended. Install the package and test dependencies:
 python -m pip install -e ".[test]"
 ```
 
-Run the synthetic test suite:
+Run the test suite:
 
 ```bash
 python -m pytest -q
@@ -42,15 +42,15 @@ python scripts/run_synthetic_smoke.py
 
 ## Configuration
 
-The proposed framework configuration is stored in `configs/sleep2mi.json`.
-Paths in a local data adapter should remain relative to the repository or be
-supplied at runtime. No target-cohort labels are used to update the encoder.
+The encoder configuration fields in `configs/sleep2mi.json` can be loaded
+through the public `Sleep2MIConfig.from_json(...)` interface. No target-cohort
+labels are used to update the encoder.
 
-## Reproducibility boundary
+## Reproducibility scope
 
-The code release reproduces the proposed encoder architecture, objective
-definitions, and core geometry computation. Reproducing the manuscript
-estimates additionally requires the public datasets and preprocessing
-inventories described in the Methods and Supplementary Information. The
-aggregate timing table is provided for verification without exposing
-participant-level records or third-party weights.
+This release provides the proposed encoder architecture, objective definitions,
+and core participant-geometry computation. Reproducing the manuscript estimates
+additionally requires the public datasets and the preprocessing and evaluation
+procedures described in the Methods and Supplementary Information. The aggregate
+CPU-efficiency table is included as a machine-readable summary of the values
+reported in the manuscript.

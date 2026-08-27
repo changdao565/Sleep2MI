@@ -1,9 +1,29 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+import json
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass, fields
+from pathlib import Path
 
 import torch
 from torch import nn
+
+
+_NON_MODEL_CONFIG_FIELDS = frozenset(
+    {
+        "sampling_rate_hz",
+        "epoch_seconds",
+        "structure_loss_weight",
+        "bag_consistency_weight",
+        "structure_temperature",
+        "self_supervised_temperature",
+        "temporal_max_shift_samples",
+        "temporal_mask_fraction",
+        "temporal_noise_std",
+        "frequency_dropout_probability",
+        "frequency_amplitude_jitter_std",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -23,11 +43,49 @@ class Sleep2MIConfig:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, values: dict[str, object]) -> "Sleep2MIConfig":
+    def from_dict(cls, values: Mapping[str, object]) -> "Sleep2MIConfig":
+        """Extract and validate model fields from the manuscript configuration."""
         values = dict(values)
-        if "kernel_sizes" in values and not isinstance(values["kernel_sizes"], tuple):
-            values["kernel_sizes"] = tuple(values["kernel_sizes"])  # type: ignore[arg-type]
-        return cls(**values)
+        model_fields = {field.name for field in fields(cls)}
+        unknown_fields = set(values) - model_fields - _NON_MODEL_CONFIG_FIELDS
+        if unknown_fields:
+            names = ", ".join(sorted(unknown_fields))
+            raise ValueError(f"Unknown Sleep2MI configuration field(s): {names}")
+
+        model_values = {
+            key: value for key, value in values.items() if key in model_fields
+        }
+        if "kernel_sizes" in model_values:
+            kernel_sizes = model_values["kernel_sizes"]
+            if not isinstance(kernel_sizes, (list, tuple)):
+                raise TypeError(
+                    "kernel_sizes must be a list or tuple of positive integers"
+                )
+            if not kernel_sizes:
+                raise ValueError(
+                    "kernel_sizes must contain at least one positive integer"
+                )
+            for index, kernel_size in enumerate(kernel_sizes):
+                if isinstance(kernel_size, bool) or not isinstance(kernel_size, int):
+                    raise TypeError(
+                        f"kernel_sizes[{index}] must be an integer; "
+                        f"got {type(kernel_size).__name__}"
+                    )
+                if kernel_size <= 0:
+                    raise ValueError(
+                        f"kernel_sizes[{index}] must be positive; got {kernel_size}"
+                    )
+            model_values["kernel_sizes"] = tuple(kernel_sizes)
+        return cls(**model_values)
+
+    @classmethod
+    def from_json(cls, path: str | Path) -> "Sleep2MIConfig":
+        """Load model fields from a JSON manuscript configuration file."""
+        with Path(path).open(encoding="utf-8") as stream:
+            values = json.load(stream)
+        if not isinstance(values, dict):
+            raise TypeError("Sleep2MI configuration JSON must contain an object")
+        return cls.from_dict(values)
 
 
 class MultiScaleTemporalCNN(nn.Module):
@@ -160,4 +218,3 @@ class Sleep2MIEncoder(nn.Module):
 
 def build_sleep2mi(config: Sleep2MIConfig | None = None) -> Sleep2MIEncoder:
     return Sleep2MIEncoder(config or Sleep2MIConfig())
-
