@@ -1,0 +1,76 @@
+# Reproducibility scope
+
+## Included in this repository
+
+The public package supports the following checks without participant data:
+
+1. construct the Sleep2MI encoder from `configs/sleep2mi.json`;
+2. verify the 68,322-parameter encoder backbone and 32-dimensional output;
+3. evaluate the three representation-learning objective implementations on
+   synthetic tensors;
+4. compute the participant PCA2 geometry, permutation null distribution, and
+   stratified bootstrap interval on synthetic features;
+5. extract embeddings from a user-supplied preprocessed EEG-epoch array using a
+   compatible user-supplied checkpoint;
+6. compute the released geometry analysis from user-supplied participant-level
+   features and prespecified binary group labels;
+7. run the unit and smoke tests; and
+8. inspect the aggregate CPU-efficiency table used in the manuscript.
+
+The quickest verification sequence is:
+
+```bash
+python -m pip install -e ".[test]"
+python examples/quickstart.py
+python scripts/run_synthetic_smoke.py
+python -m pytest -q
+python scripts/verify_manifest.py
+```
+
+## Command-line reference workflows
+
+`scripts/extract_embeddings.py` loads an EEG-epoch `.npy` array with shape
+`(epochs, channels, samples)`, strictly loads a trusted checkpoint containing a
+`model_state` mapping, and writes stage logits and 32-dimensional embeddings to
+an `.npz` file. A checkpoint-embedded configuration is preferred; otherwise the
+script uses `configs/sleep2mi.json`.
+
+`scripts/compute_geometry.py` accepts a participant-by-feature `.npy` or `.npz`
+array and prespecified binary labels. It reproduces the public core computation:
+median imputation, standardization, PCA2, the between-to-within distance ratio,
+the label-permutation test, and the group-stratified bootstrap interval.
+The command does not define aptitude groups or aggregate epochs into
+participant-level features; those analysis-specific steps are specified in the
+Methods and Supplementary Information.
+
+## Configuration contract
+
+`configs/sleep2mi.json` records the manuscript encoder, objective, and
+self-supervised augmentation settings. `Sleep2MIConfig.from_json(...)` extracts
+the encoder fields, while the objective module exposes the corresponding loss
+weights, temperatures, and augmentation defaults. The test suite checks these
+values against the public configuration.
+
+## Manuscript estimates
+
+The repository is a reference implementation. Reproducing the numerical
+estimates in the manuscript additionally requires:
+
+- obtaining each public dataset from its original provider;
+- applying the cohort definitions, preprocessing, physical-window inventories,
+  and participant splits specified in the Methods and Supplementary
+  Information;
+- training or obtaining the relevant Sleep2MI and comparison-model checkpoints;
+  and
+- applying the downstream evaluation and statistical procedures defined in the
+  manuscript.
+
+The repository does not contain raw EEG, participant-level embeddings or
+predictions, resampling draws, trained checkpoints, third-party weights, or raw
+timing traces.
+
+## Release integrity
+
+`MANIFEST.sha256` records SHA-256 hashes for the release files. The verification
+script checks every listed file and, in a Git checkout, also checks that each
+tracked release file is represented exactly once.

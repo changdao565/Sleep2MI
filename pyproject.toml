@@ -5,8 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sleep2mi"
 version = "0.1.0"
-description = "Sleep-supervised EEG representation learning and participant geometry"
+description = "Sleep-structure-supervised EEG representation learning for motor-imagery BCI phenotypes"
+readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+  { name = "Chang Dao" },
+  { name = "Zijian Wang" },
+  { name = "Juexiao Zhou", email = "juexiao.zhou@gmail.com" },
+]
+keywords = [
+  "brain-computer interface",
+  "electroencephalography",
+  "motor imagery",
+  "representation learning",
+  "sleep",
+]
 dependencies = [
   "numpy>=1.26",
   "scikit-learn>=1.4",
@@ -16,10 +29,14 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest>=8"]
 
+[project.urls]
+Homepage = "https://github.com/changdao565/Sleep2MI"
+Repository = "https://github.com/changdao565/Sleep2MI"
+Issues = "https://github.com/changdao565/Sleep2MI/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-

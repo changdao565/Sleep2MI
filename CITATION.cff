@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Sleep2MI"
+type: software
+version: 0.1.0
+abstract: >-
+  Reference implementation of sleep-structure-supervised EEG representation
+  learning and participant-geometry analysis for motor-imagery
+  brain-computer-interface phenotypes.
+authors:
+  - family-names: Dao
+    given-names: Chang
+    affiliation: "School of Data Science, The Chinese University of Hong Kong, Shenzhen"
+  - family-names: Wang
+    given-names: Zijian
+    affiliation: "School of Data Science, The Chinese University of Hong Kong, Shenzhen"
+  - family-names: Zhou
+    given-names: Juexiao
+    email: juexiao.zhou@gmail.com
+    affiliation: "School of Data Science, The Chinese University of Hong Kong, Shenzhen"
+repository-code: "https://github.com/changdao565/Sleep2MI"
+url: "https://github.com/changdao565/Sleep2MI"
+keywords:
+  - brain-computer interface
+  - electroencephalography
+  - motor imagery
+  - representation learning
+  - sleep

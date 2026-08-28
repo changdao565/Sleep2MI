@@ -25,6 +25,14 @@ _NON_MODEL_CONFIG_FIELDS = frozenset(
     }
 )
 
+_LEGACY_MODEL_CONFIG_FIELDS = frozenset(
+    {
+        "transformer_layers",
+        "transformer_heads",
+        "use_transformer",
+    }
+)
+
 
 @dataclass(frozen=True)
 class Sleep2MIConfig:
@@ -44,16 +52,67 @@ class Sleep2MIConfig:
 
     @classmethod
     def from_dict(cls, values: Mapping[str, object]) -> "Sleep2MIConfig":
-        """Extract and validate model fields from the manuscript configuration."""
-        values = dict(values)
+        """Extract model fields and normalize the preserved V1 vocabulary.
+
+        The released V1 checkpoints predate the canonical ``sequence_layers``
+        name.  Their explicit GRU configuration stores the same value under
+        ``transformer_layers`` and also carries two transformer-only fields
+        that are inert for that GRU runtime.  These three known legacy fields
+        are resolved here; any other unregistered field remains an error.
+        """
+        normalized = dict(values)
         model_fields = {field.name for field in fields(cls)}
-        unknown_fields = set(values) - model_fields - _NON_MODEL_CONFIG_FIELDS
+        unknown_fields = (
+            set(normalized)
+            - model_fields
+            - _NON_MODEL_CONFIG_FIELDS
+            - _LEGACY_MODEL_CONFIG_FIELDS
+        )
         if unknown_fields:
             names = ", ".join(sorted(unknown_fields))
             raise ValueError(f"Unknown Sleep2MI configuration field(s): {names}")
 
+        legacy_use_transformer = normalized.pop("use_transformer", None)
+        if legacy_use_transformer is not None and not isinstance(
+            legacy_use_transformer, bool
+        ):
+            raise TypeError("legacy use_transformer must be a boolean")
+
+        legacy_heads = normalized.pop("transformer_heads", None)
+        if legacy_heads is not None:
+            if isinstance(legacy_heads, bool) or not isinstance(legacy_heads, int):
+                raise TypeError("legacy transformer_heads must be an integer")
+            if legacy_heads <= 0:
+                raise ValueError("legacy transformer_heads must be positive")
+
+        legacy_layers = normalized.pop("transformer_layers", None)
+        canonical_layers = normalized.get("sequence_layers")
+        if legacy_layers is not None:
+            if isinstance(legacy_layers, bool) or not isinstance(legacy_layers, int):
+                raise TypeError("legacy transformer_layers must be an integer")
+            if legacy_layers <= 0:
+                raise ValueError("legacy transformer_layers must be positive")
+        if canonical_layers is not None and legacy_layers is not None:
+            if canonical_layers != legacy_layers:
+                raise ValueError(
+                    "Conflicting sequence_layers and legacy transformer_layers"
+                )
+        elif canonical_layers is None and legacy_layers is not None:
+            normalized["sequence_layers"] = legacy_layers
+
+        raw_sequence_model = normalized.get("sequence_model")
+        if raw_sequence_model == "auto":
+            use_transformer = (
+                True
+                if legacy_use_transformer is None
+                else legacy_use_transformer
+            )
+            normalized["sequence_model"] = (
+                "transformer" if use_transformer else "none"
+            )
+
         model_values = {
-            key: value for key, value in values.items() if key in model_fields
+            key: value for key, value in normalized.items() if key in model_fields
         }
         if "kernel_sizes" in model_values:
             kernel_sizes = model_values["kernel_sizes"]

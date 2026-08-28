@@ -1,8 +1,15 @@
+import inspect
+import json
 from pathlib import Path
 
 import pytest
 
 from sleep2mi import Sleep2MIConfig
+from sleep2mi.objectives import (
+    SelfSupervisedAugmentationConfig,
+    sleep_structure_objective,
+    symmetric_contrastive_loss,
+)
 from sleep2mi.smoke import run_synthetic_smoke
 
 
@@ -29,6 +36,42 @@ def test_manuscript_config_loads_through_public_interface() -> None:
         "sequence_model": "gru",
         "bottleneck_dim": 32,
     }
+
+
+def test_objective_defaults_match_manuscript_config() -> None:
+    values = json.loads(MANUSCRIPT_CONFIG.read_text(encoding="utf-8"))
+    augmentations = SelfSupervisedAugmentationConfig()
+    assert augmentations.max_shift_samples == values["temporal_max_shift_samples"]
+    assert augmentations.mask_fraction == values["temporal_mask_fraction"]
+    assert augmentations.noise_std == values["temporal_noise_std"]
+    assert (
+        augmentations.frequency_dropout_probability
+        == values["frequency_dropout_probability"]
+    )
+    assert (
+        augmentations.frequency_amplitude_jitter_std
+        == values["frequency_amplitude_jitter_std"]
+    )
+    assert augmentations.temperature == values["self_supervised_temperature"]
+
+    structure_signature = inspect.signature(sleep_structure_objective)
+    assert (
+        structure_signature.parameters["structure_weight"].default
+        == values["structure_loss_weight"]
+    )
+    assert (
+        structure_signature.parameters["consistency_weight"].default
+        == values["bag_consistency_weight"]
+    )
+    assert (
+        structure_signature.parameters["temperature"].default
+        == values["structure_temperature"]
+    )
+    self_supervised_signature = inspect.signature(symmetric_contrastive_loss)
+    assert (
+        self_supervised_signature.parameters["temperature"].default
+        == values["self_supervised_temperature"]
+    )
 
 
 def test_from_dict_converts_kernel_sizes_to_tuple() -> None:
