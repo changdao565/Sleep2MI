@@ -51,6 +51,18 @@ the encoder fields, while the objective module exposes the corresponding loss
 weights, temperatures, and augmentation defaults. The test suite checks these
 values against the public configuration.
 
+The self-supervised contrastive learning (Self-supervised contrastive) branch
+uses 64 Sleep-EDF records. Epoch
+eligibility is determined from the signal arrays without reading sleep-stage
+annotations. Accepted source arrays have epoch-by-time or
+epoch-by-channel-by-time layout, at least two time samples, all finite values,
+and per-channel standard deviation greater than `1e-8`. Each record contributes
+at most 300 signal-valid epochs selected at deterministic, evenly spaced
+chronological positions. Training uses batches of 64 for two epochs, maintains
+participant-disjoint training and validation partitions, and selects the
+checkpoint with minimum validation contrastive loss. These fields are recorded
+under `self_supervised_training` in the public configuration.
+
 ## Manuscript estimates
 
 The repository is a reference implementation. Reproducing the numerical

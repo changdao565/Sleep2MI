@@ -19,6 +19,22 @@
   "temporal_mask_fraction": 0.05,
   "temporal_noise_std": 0.03,
   "frequency_dropout_probability": 0.08,
-  "frequency_amplitude_jitter_std": 0.05
+  "frequency_amplitude_jitter_std": 0.05,
+  "self_supervised_training": {
+    "source_dataset": "Sleep-EDF",
+    "record_count": 64,
+    "epoch_eligibility": {
+      "accepted_source_array_layouts": ["epoch_time", "epoch_channel_time"],
+      "minimum_time_samples": 2,
+      "all_values_finite": true,
+      "per_channel_standard_deviation_strictly_greater_than": 1e-8
+    },
+    "uses_sleep_stage_annotations": false,
+    "max_epochs_per_record": 300,
+    "selection": "deterministic_evenly_spaced_chronological",
+    "batch_size": 64,
+    "training_epochs": 2,
+    "validation_split": "participant_disjoint",
+    "checkpoint_selection": "minimum_validation_contrastive_loss"
+  }
 }
-

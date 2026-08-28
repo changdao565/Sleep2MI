@@ -22,6 +22,7 @@ _NON_MODEL_CONFIG_FIELDS = frozenset(
         "temporal_noise_std",
         "frequency_dropout_probability",
         "frequency_amplitude_jitter_std",
+        "self_supervised_training",
     }
 )
 

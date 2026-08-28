@@ -23,8 +23,9 @@ motor-imagery brain-computer interface cohorts. This repository provides:
 
 - the multi-scale convolutional, channel-attention, bidirectional-GRU, and
   temporal-attention encoder with a 32-dimensional bottleneck;
-- stage cross-entropy, time-frequency self-supervised contrastive learning, and
-  sleep-structure supervised contrastive objectives;
+- stage cross-entropy, self-supervised contrastive learning (Self-supervised
+  contrastive) with time-frequency views, and sleep-structure supervised
+  contrastive learning (Sleep-structure SupCon);
 - record-level bag-attention pooling and paired-bag consistency;
 - the participant-geometry statistic and its permutation and bootstrap tools;
 - synthetic examples and tests that do not require participant data; and
@@ -113,7 +114,15 @@ permutations and 5,000 group-stratified bootstrap resamples by default.
 `Sleep2MIConfig.from_json(...)` loads the encoder fields from
 `configs/sleep2mi.json`. The same file records the manuscript loss weights,
 contrastive temperatures, and self-supervised augmentation settings. The
-configuration and source defaults are checked by the test suite.
+Self-supervised contrastive training contract uses 64 Sleep-EDF records and
+signal-valid epochs selected without access to sleep-stage annotations. It caps
+each record at 300 epochs using deterministic, evenly spaced chronological
+positions, uses batches of 64 for two training epochs, keeps training and
+validation participants disjoint, and retains the checkpoint with minimum
+validation contrastive loss. Signal validity requires an expected channel/time
+shape, at least two time samples, all finite values, and per-channel standard
+deviation greater than `1e-8`. The configuration and source defaults are
+checked by the test suite.
 
 ## Data and model availability
 

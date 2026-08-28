@@ -74,6 +74,27 @@ def test_objective_defaults_match_manuscript_config() -> None:
     )
 
 
+def test_self_supervised_training_contract_matches_manuscript_config() -> None:
+    values = json.loads(MANUSCRIPT_CONFIG.read_text(encoding="utf-8"))
+    assert values["self_supervised_training"] == {
+        "source_dataset": "Sleep-EDF",
+        "record_count": 64,
+        "epoch_eligibility": {
+            "accepted_source_array_layouts": ["epoch_time", "epoch_channel_time"],
+            "minimum_time_samples": 2,
+            "all_values_finite": True,
+            "per_channel_standard_deviation_strictly_greater_than": 1e-8,
+        },
+        "uses_sleep_stage_annotations": False,
+        "max_epochs_per_record": 300,
+        "selection": "deterministic_evenly_spaced_chronological",
+        "batch_size": 64,
+        "training_epochs": 2,
+        "validation_split": "participant_disjoint",
+        "checkpoint_selection": "minimum_validation_contrastive_loss",
+    }
+
+
 def test_from_dict_converts_kernel_sizes_to_tuple() -> None:
     config = Sleep2MIConfig.from_dict({"kernel_sizes": [7, 15, 31]})
     assert config.kernel_sizes == (7, 15, 31)
