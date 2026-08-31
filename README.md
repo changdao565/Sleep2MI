@@ -28,6 +28,8 @@ motor-imagery brain-computer interface cohorts. This repository provides:
   contrastive learning (Sleep-structure SupCon);
 - record-level bag-attention pooling and paired-bag consistency;
 - the participant-geometry statistic and its permutation and bootstrap tools;
+- task-valid feedback-score aggregation and fold-local longitudinal evaluation
+  utilities;
 - synthetic examples and tests that do not require participant data; and
 - the aggregate CPU-efficiency summary reported in the manuscript.
 
@@ -35,12 +37,13 @@ motor-imagery brain-computer interface cohorts. This repository provides:
 
 | Path | Contents |
 | --- | --- |
-| `src/sleep2mi/` | Encoder, objectives, pooling, and participant geometry |
+| `src/sleep2mi/` | Encoder, objectives, pooling, participant geometry, and longitudinal evaluation utilities |
 | `configs/sleep2mi.json` | Manuscript architecture and objective settings |
 | `examples/quickstart.py` | Minimal model-construction and inference example |
 | `scripts/extract_embeddings.py` | Checkpoint-based EEG-epoch embedding extraction |
 | `scripts/compute_geometry.py` | Participant PCA2 geometry, permutation, and bootstrap analysis |
 | `scripts/run_synthetic_smoke.py` | End-to-end synthetic smoke test |
+| `scripts/run_longitudinal_synthetic.py` | Participant-free check of feedback aggregation and outer-fold evaluation |
 | `scripts/verify_manifest.py` | SHA-256 release-integrity check |
 | `tests/` | Synthetic unit and configuration tests |
 | `results/aggregate/` | Aggregate computational-efficiency results |
@@ -69,6 +72,7 @@ Run the broader synthetic smoke test and test suite:
 
 ```bash
 python scripts/run_synthetic_smoke.py
+python scripts/run_longitudinal_synthetic.py
 python -m pytest -q
 ```
 
@@ -109,6 +113,24 @@ The geometry command standardizes the participant features, fits PCA2, computes
 the between-to-within group-distance ratio, and evaluates it using 5,000 label
 permutations and 5,000 group-stratified bootstrap resamples by default.
 
+The public longitudinal helpers implement the task-matched feedback score and
+the leakage-controlled downstream transform used in the manuscript. For each
+held-out trial, `task_valid_membership(...)` divides the instructed-target
+membership by the summed membership of the valid classes for that task: classes
+1/2 for LR, 3/4 for UD, and all four classes for 2D. Trial summaries receive
+equal weight within each participant, task, and seed; the predefined seed
+summaries then receive equal weight.
+
+`group_adjusted_oof(...)` repeats score imputation, empirical-midrank mapping,
+standardization, nuisance transformation, and OLS fitting inside each outer
+training fold. Held-out values are mapped only against the corresponding
+outer-training distribution. The synthetic command exercises this interface
+without using participant data:
+
+```bash
+python scripts/run_longitudinal_synthetic.py
+```
+
 ## Configuration
 
 `Sleep2MIConfig.from_json(...)` loads the encoder fields from
@@ -124,6 +146,11 @@ shape, at least two time samples, all finite values, and per-channel standard
 deviation greater than `1e-8`. The configuration and source defaults are
 checked by the test suite.
 
+The `longitudinal_feedback_evaluation` block records the task-valid class sets,
+trial/seed aggregation rule, unranked Session 1 information check, and
+outer-training-only empirical-midrank and standardization contract. It contains
+method settings only; participant-level scores and outcomes are not included.
+
 ## Data and model availability
 
 This repository does not redistribute public EEG recordings, participant-level
@@ -136,10 +163,10 @@ terms. Dataset roles and the release boundary are summarized in
 ## Reproducibility scope
 
 The release is a reference implementation of the Sleep2MI architecture,
-objective definitions, and core participant-geometry computation. Reproducing
-the manuscript estimates additionally requires the public datasets and the
-preprocessing and evaluation procedures defined in the Methods and
-Supplementary Information. See
+objective definitions, core participant-geometry computation, and longitudinal
+feedback-score evaluator. Reproducing the manuscript estimates additionally
+requires the public datasets and the preprocessing and resampling inventories
+defined in the Methods and Supplementary Information. See
 [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) for the exact boundary.
 
 ## Citation

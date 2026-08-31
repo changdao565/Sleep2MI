@@ -95,6 +95,32 @@ def test_self_supervised_training_contract_matches_manuscript_config() -> None:
     }
 
 
+def test_longitudinal_feedback_contract_matches_manuscript_config() -> None:
+    values = json.loads(MANUSCRIPT_CONFIG.read_text(encoding="utf-8"))
+    assert values["longitudinal_feedback_evaluation"] == {
+        "membership_output_classes": 4,
+        "task_valid_classes": {
+            "LR": [1, 2],
+            "UD": [3, 4],
+            "2D": [1, 2, 3, 4],
+        },
+        "trial_score": "target_membership_divided_by_task_valid_membership_sum",
+        "within_seed_aggregation": "equal_weight_across_held_out_trials",
+        "across_seed_aggregation": "equal_weight_across_predefined_seeds",
+        "session1_gate_b_transform": "unranked_task_valid_membership",
+        "outer_fold_missing_score": "outer_training_median",
+        "outer_fold_score_transform": "outer_training_empirical_midrank",
+        "test_midrank_mapping": (
+            "training_count_below_plus_half_equal_divided_by_n_train"
+        ),
+        "outer_fold_standardization": (
+            "training_mean_and_population_standard_deviation"
+        ),
+        "reduced_model": ["intercept", "experimental_group"],
+        "full_model_addition": "task_matched_feedback_score",
+    }
+
+
 def test_from_dict_converts_kernel_sizes_to_tuple() -> None:
     config = Sleep2MIConfig.from_dict({"kernel_sizes": [7, 15, 31]})
     assert config.kernel_sizes == (7, 15, 31)

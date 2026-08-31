@@ -107,3 +107,14 @@ def test_compute_geometry_cli_writes_machine_readable_outputs(
     with np.load(coordinates_output, allow_pickle=False) as output:
         assert output["coordinates"].shape == (20, 2)
         assert np.array_equal(output["labels"], labels)
+
+
+def test_longitudinal_synthetic_cli_reports_finite_metrics() -> None:
+    completed = run_script("scripts/run_longitudinal_synthetic.py")
+    result = json.loads(completed.stdout)
+    assert result["data"] == "synthetic"
+    assert result["participants"] == 18
+    assert result["task"] == "LR"
+    assert result["seeds"] == 2
+    assert result["minimum_test_predictions_per_participant"] == 1
+    assert np.isfinite(list(result["metrics"].values())).all()

@@ -15,7 +15,9 @@ The public package supports the following checks without participant data:
 6. compute the released geometry analysis from user-supplied participant-level
    features and prespecified binary group labels;
 7. run the unit and smoke tests; and
-8. inspect the aggregate CPU-efficiency table used in the manuscript.
+8. compute task-valid trial scores, equal-weight trial/seed summaries, and
+   group-adjusted outer-fold predictions on caller-supplied arrays; and
+9. inspect the aggregate CPU-efficiency table used in the manuscript.
 
 The quickest verification sequence is:
 
@@ -23,6 +25,7 @@ The quickest verification sequence is:
 python -m pip install -e ".[test]"
 python examples/quickstart.py
 python scripts/run_synthetic_smoke.py
+python scripts/run_longitudinal_synthetic.py
 python -m pytest -q
 python scripts/verify_manifest.py
 ```
@@ -42,6 +45,15 @@ the label-permutation test, and the group-stratified bootstrap interval.
 The command does not define aptitude groups or aggregate epochs into
 participant-level features; those analysis-specific steps are specified in the
 Methods and Supplementary Information.
+
+`scripts/run_longitudinal_synthetic.py` exercises the released feedback-score
+and longitudinal-evaluation interface on generated four-class membership
+outputs. `task_valid_membership(...)` computes the instructed-target membership
+within the task-valid class set. `aggregate_trial_and_seed_equal(...)` gives
+trials equal weight within each participant/task/seed and then gives the
+predefined seed summaries equal weight. `group_adjusted_oof(...)` fits the
+score transform and regression model separately in each outer-training fold.
+The held-out score map uses only counts from that fold's training scores.
 
 ## Configuration contract
 
@@ -63,6 +75,13 @@ participant-disjoint training and validation partitions, and selects the
 checkpoint with minimum validation contrastive loss. These fields are recorded
 under `self_supervised_training` in the public configuration.
 
+The `longitudinal_feedback_evaluation` block records the downstream contract:
+the valid class set for each task, equal trial/seed aggregation, the unranked
+Session 1 information score, outer-training median imputation, empirical
+midranks, population-standard-deviation scaling, and the reduced and full OLS
+designs. The configuration does not include participant data or resampling
+draws.
+
 ## Manuscript estimates
 
 The repository is a reference implementation. Reproducing the numerical
@@ -73,8 +92,9 @@ estimates in the manuscript additionally requires:
   and participant splits specified in the Methods and Supplementary
   Information;
 - training or obtaining the relevant Sleep2MI and comparison-model checkpoints;
-  and
-- applying the downstream evaluation and statistical procedures defined in the
+- supplying the locked participant folds, permutation draws, and bootstrap
+  draws; and
+- applying the complete downstream statistical procedures defined in the
   manuscript.
 
 The repository does not contain raw EEG, participant-level embeddings or
