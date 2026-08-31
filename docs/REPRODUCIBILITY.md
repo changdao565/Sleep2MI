@@ -48,12 +48,15 @@ Methods and Supplementary Information.
 
 `scripts/run_longitudinal_synthetic.py` exercises the released feedback-score
 and longitudinal-evaluation interface on generated four-class membership
-outputs. `task_valid_membership(...)` computes the instructed-target membership
-within the task-valid class set. `aggregate_trial_and_seed_equal(...)` gives
-trials equal weight within each participant/task/seed and then gives the
-predefined seed summaries equal weight. `group_adjusted_oof(...)` fits the
-score transform and regression model separately in each outer-training fold.
-The held-out score map uses only counts from that fold's training scores.
+outputs. For real window-level inputs, the data adapter first averages the
+four-class membership vectors across complete windows within each held-out
+trial. `task_valid_membership(...)` then computes the instructed-target
+membership within the task-valid class set from that trial-level vector.
+`aggregate_trial_and_seed_equal(...)` requires one score per trial, gives
+trials equal weight within each participant/task/training run, and then gives
+the predefined training-run summaries equal weight. `group_adjusted_oof(...)`
+fits the score transform and regression model separately in each outer-training
+fold. The held-out score map uses only counts from that fold's training scores.
 
 ## Configuration contract
 

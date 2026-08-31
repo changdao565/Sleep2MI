@@ -44,9 +44,10 @@
       "UD": [3, 4],
       "2D": [1, 2, 3, 4]
     },
+    "window_to_trial_membership": "mean_four_class_vector_before_task_valid_ratio",
     "trial_score": "target_membership_divided_by_task_valid_membership_sum",
-    "within_seed_aggregation": "equal_weight_across_held_out_trials",
-    "across_seed_aggregation": "equal_weight_across_predefined_seeds",
+    "within_training_run_aggregation": "equal_weight_across_held_out_trials",
+    "across_training_run_aggregation": "equal_weight_across_predefined_runs",
     "session1_gate_b_transform": "unranked_task_valid_membership",
     "outer_fold_missing_score": "outer_training_median",
     "outer_fold_score_transform": "outer_training_empirical_midrank",

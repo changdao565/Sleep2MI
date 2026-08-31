@@ -115,11 +115,14 @@ permutations and 5,000 group-stratified bootstrap resamples by default.
 
 The public longitudinal helpers implement the task-matched feedback score and
 the leakage-controlled downstream transform used in the manuscript. For each
-held-out trial, `task_valid_membership(...)` divides the instructed-target
-membership by the summed membership of the valid classes for that task: classes
-1/2 for LR, 3/4 for UD, and all four classes for 2D. Trial summaries receive
-equal weight within each participant, task, and seed; the predefined seed
-summaries then receive equal weight.
+held-out trial, first average the complete-window four-class membership vectors.
+`task_valid_membership(...)` then divides the instructed-target component of
+that trial-level mean vector by the summed membership of the valid classes for
+that task: classes 1/2 for LR, 3/4 for UD, and all four classes for 2D. Trial
+scores receive equal weight within each participant, task, and encoder training
+run; the predefined training-run summaries then receive equal weight. The
+released aggregator rejects duplicate rows for the same held-out trial so that
+window-level ratios cannot be averaged accidentally.
 
 `group_adjusted_oof(...)` repeats score imputation, empirical-midrank mapping,
 standardization, nuisance transformation, and OLS fitting inside each outer

@@ -41,17 +41,28 @@ def test_task_valid_membership_rejects_invalid_task_target_and_simplex() -> None
 
 def test_trial_and_seed_aggregation_uses_equal_weights() -> None:
     aggregation = aggregate_trial_and_seed_equal(
-        scores=[0.0, 2.0, 5.0, 9.0],
-        participant_ids=["P01", "P01", "P01", "P01"],
-        tasks=["LR", "LR", "LR", "LR"],
-        seeds=["seed_a", "seed_a", "seed_a", "seed_b"],
-        trial_ids=["T1", "T1", "T2", "T1"],
+        scores=[1.0, 5.0, 9.0],
+        participant_ids=["P01", "P01", "P01"],
+        tasks=["LR", "LR", "LR"],
+        seeds=["seed_a", "seed_a", "seed_b"],
+        trial_ids=["T1", "T2", "T1"],
     )
-    # T1 in seed_a averages to 1; equal trial weighting gives (1 + 5) / 2.
+    # The two trial-level scores in seed_a receive equal weight.
     assert aggregation.seed_scores[("P01", "LR", "seed_a")] == pytest.approx(3.0)
     assert aggregation.seed_scores[("P01", "LR", "seed_b")] == pytest.approx(9.0)
     # The two predefined seed summaries then receive equal weight.
     assert aggregation.ensemble_scores[("P01", "LR")] == pytest.approx(6.0)
+
+
+def test_trial_aggregation_rejects_window_level_score_duplicates() -> None:
+    with pytest.raises(ValueError, match="one task-valid score per trial"):
+        aggregate_trial_and_seed_equal(
+            scores=[0.25, 0.75],
+            participant_ids=["P01", "P01"],
+            tasks=["LR", "LR"],
+            seeds=["seed_a", "seed_a"],
+            trial_ids=["T1", "T1"],
+        )
 
 
 def test_outer_training_midrank_matches_locked_definition() -> None:

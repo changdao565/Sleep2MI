@@ -64,6 +64,11 @@ def task_valid_membership(
 ) -> np.ndarray:
     """Return instructed-target membership within each task-valid class set.
 
+    Each input row must be the mean four-class membership vector across the
+    complete windows of one held-out trial. The task-valid ratio is computed
+    only after that vector average; averaging window-level ratios is not the
+    released procedure.
+
     Class labels are one-based: LR uses classes 1/2, UD uses 3/4, and 2D uses
     all four classes. For row ``i``, the released score is
 
@@ -118,7 +123,13 @@ def aggregate_trial_and_seed_equal(
     seeds: Sequence[Hashable],
     trial_ids: Sequence[Hashable],
 ) -> FeedbackAggregation:
-    """Average windows within trials, trials within seeds, and seeds equally."""
+    """Average trial-level scores within seeds and predefined seeds equally.
+
+    ``scores`` must contain exactly one task-valid score per held-out trial.
+    Callers with window-level outputs must first average the four-class
+    membership vectors within each trial and then call
+    :func:`task_valid_membership`.
+    """
 
     values = np.asarray(scores, dtype=np.float64)
     arrays = [participant_ids, tasks, seeds, trial_ids]
@@ -127,20 +138,22 @@ def aggregate_trial_and_seed_equal(
     if not np.all(np.isfinite(values)):
         raise ValueError("scores must be finite")
 
-    window_groups: dict[tuple[Hashable, str, Hashable, Hashable], list[float]] = (
-        defaultdict(list)
-    )
+    seen_trials: set[tuple[Hashable, str, Hashable, Hashable]] = set()
+    trial_groups: dict[tuple[Hashable, str, Hashable], list[float]] = defaultdict(list)
     for score, participant, task, seed, trial in zip(
         values, participant_ids, tasks, seeds, trial_ids, strict=True
     ):
         task_name = str(task)
         if task_name not in TASK_VALID_CLASSES:
             raise ValueError(f"unknown task: {task_name}")
-        window_groups[(participant, task_name, seed, trial)].append(float(score))
-
-    trial_groups: dict[tuple[Hashable, str, Hashable], list[float]] = defaultdict(list)
-    for (participant, task, seed, _trial), window_values in window_groups.items():
-        trial_groups[(participant, task, seed)].append(float(np.mean(window_values)))
+        trial_key = (participant, task_name, seed, trial)
+        if trial_key in seen_trials:
+            raise ValueError(
+                "scores must contain one task-valid score per trial; average "
+                "four-class membership vectors before computing the ratio"
+            )
+        seen_trials.add(trial_key)
+        trial_groups[(participant, task_name, seed)].append(float(score))
 
     seed_scores = {
         key: float(np.mean(trial_values)) for key, trial_values in trial_groups.items()
