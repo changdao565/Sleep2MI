@@ -14,7 +14,7 @@ The public package supports the following checks without participant data:
    compatible user-supplied checkpoint;
 6. compute the released geometry analysis from user-supplied participant-level
    features and prespecified binary group labels;
-7. run the unit and smoke tests; and
+7. run the unit and smoke tests;
 8. compute task-valid trial scores, equal-weight trial/seed summaries, and
    group-adjusted outer-fold predictions on caller-supplied arrays; and
 9. inspect the aggregate CPU-efficiency table used in the manuscript.

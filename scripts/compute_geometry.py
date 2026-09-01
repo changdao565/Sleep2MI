@@ -82,8 +82,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         raise ValueError("features and labels must contain the same participants")
     if not np.issubdtype(features.dtype, np.number):
         raise TypeError("features must be numeric")
-    if not np.isfinite(features).all():
-        raise ValueError("features contain non-finite values")
+    if np.isinf(features).any():
+        raise ValueError("features contain infinite values")
     if not np.isfinite(labels).all():
         raise ValueError("labels contain non-finite values")
     unique_labels = set(np.unique(labels).tolist())

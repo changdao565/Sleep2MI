@@ -72,6 +72,7 @@ def test_compute_geometry_cli_writes_machine_readable_outputs(
     labels = np.repeat([0, 1], 10)
     features = rng.normal(size=(20, 8))
     features[labels == 1, :2] += 0.5
+    features[0, 0] = np.nan
     features_path = tmp_path / "participant_embeddings.npz"
     labels_path = tmp_path / "fixed_groups.npy"
     np.savez_compressed(features_path, embeddings=features)
@@ -106,6 +107,7 @@ def test_compute_geometry_cli_writes_machine_readable_outputs(
     assert len(file_result["bootstrap_95_ci"]) == 2
     with np.load(coordinates_output, allow_pickle=False) as output:
         assert output["coordinates"].shape == (20, 2)
+        assert np.isfinite(output["coordinates"]).all()
         assert np.array_equal(output["labels"], labels)
 
 

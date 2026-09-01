@@ -2,8 +2,8 @@
 
 Reference implementation accompanying the manuscript:
 
-> **Sleep-Structure-Supervised Representation Learning Enables Cross-Domain
-> and Label-Free Transfer from Sleep to Motor-Imagery Brain-Computer Interfaces**
+> **Sleep Architecture Encodes Transferable Neural Phenotypes That Predict
+> Brain-Computer Interface Aptitude Across Independent Awake Cohorts**
 
 **Authors:** Chang Dao, Zijian Wang, and Juexiao Zhou
 
@@ -49,6 +49,8 @@ motor-imagery brain-computer interface cohorts. This repository provides:
 | `results/aggregate/` | Aggregate computational-efficiency results |
 | `data/README.md` | Dataset roles and redistribution boundary |
 | `docs/REPRODUCIBILITY.md` | Reproducibility scope and verification commands |
+| `MODEL_CARD.md` | Intended use, release scope, and limitations |
+| `requirements-tested.txt` | Exact package versions used for the public CPU test suite |
 
 ## Installation
 
@@ -109,9 +111,11 @@ python scripts/compute_geometry.py \
   --coordinates-output pca2_coordinates.npz
 ```
 
-The geometry command standardizes the participant features, fits PCA2, computes
-the between-to-within group-distance ratio, and evaluates it using 5,000 label
-permutations and 5,000 group-stratified bootstrap resamples by default.
+The geometry command median-imputes missing feature values, standardizes the
+participant features, fits PCA2, computes the between-to-within group-distance
+ratio, and evaluates it using 5,000 label permutations and 5,000
+group-stratified bootstrap resamples by default. Infinite feature values are
+rejected.
 
 The public longitudinal helpers implement the task-matched feedback score and
 the leakage-controlled downstream transform used in the manuscript. For each

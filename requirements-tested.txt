@@ -1,0 +1,6 @@
+# Environment used for the public CPU test suite on 2026-09-01.
+# Python 3.12.6
+numpy==2.4.4
+scikit-learn==1.7.2
+torch==2.9.0
+pytest==9.0.3
