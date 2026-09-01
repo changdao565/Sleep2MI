@@ -78,6 +78,21 @@ python scripts/run_longitudinal_synthetic.py
 python -m pytest -q
 ```
 
+### Tested environment and expected output
+
+The public examples and tests require only a CPU; no non-standard hardware is
+needed. They were verified on Windows 11 with Python 3.12.6 and on GitHub
+Actions Linux runners with Python 3.11 and 3.12. The exact local package
+versions are recorded in `requirements-tested.txt`.
+
+`examples/quickstart.py` reports an input shape of `[2, 1, 3000]`, a stage-logit
+shape of `[2, 5]`, an embedding shape of `[2, 32]`, and 68,322 encoder
+parameters. The two smoke scripts print JSON summaries with finite geometry,
+objective, and longitudinal-evaluation metrics. On the documented Windows CPU
+test system, the quick start and each smoke script completed in approximately
+4--5 s, and the 28-test suite completed in approximately 18 s. Runtime varies
+with hardware and software environment.
+
 Verify the checksums in the release manifest:
 
 ```bash
